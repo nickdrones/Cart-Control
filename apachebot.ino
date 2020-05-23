@@ -1,3 +1,7 @@
+#include <TM1637Display.h>
+
+//#include "src/TM1637/TM1637Display.h"
+
 int forwardPin = 4;
 int backwardPin = 5;
 int PWM_out = 6;
@@ -15,7 +19,7 @@ int average = 0;
 
 
 float motorPulse = 1500;
-float middleSpace = 1460;
+float middleSpace = 1500;
 float incrementSpeed = 5;
 float decrementSpeed = 20;
 
