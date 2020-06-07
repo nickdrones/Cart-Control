@@ -1,5 +1,7 @@
 #include <TM1637Display.h> //import library for 7-segment diaplsy
 #include <Arduino.h>
+#include <SPI.h>
+#include <SD.h>
 
 //Initializing pins on Arduino Pro Mini
 int forwardPin = 4;  //forward side of dead-man rocker switch
@@ -27,6 +29,8 @@ TM1637Display display(CLK, DIO); //init 7-seg display object to pins
 
 uint8_t data[] = { 0xff, 0xff, 0xff, 0xff }; //hex vals for all segments on, holds current val to be shown
 
+const int chipSelect = 10;  //activator pin SD card is connected to
+
 void setup() {
   pinMode(forwardPin, INPUT);
   pinMode(backwardPin, INPUT); //Init the pins as in or out
@@ -36,6 +40,17 @@ void setup() {
   Serial.begin(9600);
   uint8_t blank[] = { 0x00, 0x00, 0x00, 0x00 }; //hex vals for all segments off
   display.setSegments(blank); //Set display to blank
+
+  Serial.print("Initializing SD card..."); //for debugging purposes
+  // see if the card is present and can be initialized:
+  if (!SD.begin(chipSelect)) {
+    Serial.println("Card failed, or not present");
+    // don't do anything more:
+    while (1);
+  }
+  Serial.println("card initialized.");
+  newBootUp();
+  createLogFileLine("Robot Booted and Card Initialized");
 }
 void loop() {
   uint8_t blank[] = { 0x00, 0x00, 0x00, 0x00 }; //hex vals for all segments off
@@ -97,8 +112,8 @@ float calculatePulseOffset() {
 
 void smoothDialVal() {
   int sensorValue = log(analogRead(A0))  / log(1000) * 1023;
-  if(abs(sensorValue-average) > 3){
-    average=sensorValue;
+  if (abs(sensorValue - average) > 3) {
+    average = sensorValue;
   }
 }
 
@@ -108,10 +123,16 @@ void writeToDisplay() {
   //data[1] = display.encodeDigit(int(percent / 100));
   //data[2] = display.encodeDigit(int(percent / 10));
   //data[3] = display.encodeDigit(int(percent % 10));
-  if(percentage<0){  display.showNumberDec(0, false);}
-  else if(percentage>100){  display.showNumberDec(100, false);}
-  else {display.showNumberDec(percentage, false);}
-  //display.setSegments(data);
+  if (percentage < 0) {
+    display.showNumberDec(0, false);
+  }
+  else if (percentage > 100) {
+    display.showNumberDec(100, false);
+  }
+  else {
+    display.showNumberDec(percentage, false);
+  }
+  createLogFileLine("Hello Hi Adjusting Dial");
 }
 
 void sendMSpulse(int pulseLength) { //send PWM pulse to motor
@@ -119,4 +140,45 @@ void sendMSpulse(int pulseLength) { //send PWM pulse to motor
   delayMicroseconds(pulseLength);
   digitalWrite(PWM_out, LOW);
   delay(20);
+}
+
+void createLogFileLine(String message) {
+  File dataFile = SD.open("datalog.txt", FILE_WRITE);
+  // if the file is available, write to it:
+  if (dataFile) {
+    int hr = millis() / 3600000;
+    int mn = (millis() / 60000) % 60;
+    int sec = (millis() / 1000) % 60;
+    int mil = map(millis() % 1000, 0, 999, 0, 99);
+    if (hr < 10) dataFile.print("0");
+    dataFile.print(hr);
+    dataFile.print(":");
+    if (mn < 10) dataFile.print("0");
+    dataFile.print(mn);
+    dataFile.print(":");
+    if (sec < 10) dataFile.print("0");
+    dataFile.print(sec);
+    dataFile.print(":");
+    if (mil < 10) dataFile.print("0");
+    dataFile.print(mil);
+    dataFile.print(" - ");
+    dataFile.println(message);
+    dataFile.close();
+  }
+  else {
+    Serial.println("error opening datalog.txt");
+  }
+}
+void newBootUp() {
+  File dataFile = SD.open("datalog.txt", FILE_WRITE);
+  // if the file is available, write to it:
+  if (dataFile) {
+    dataFile.println("##########################################################");
+    dataFile.println("   APACHE UVC CART CONTROL SYSTEM BOOTED - CLOCK RESET");
+    dataFile.println("##########################################################");
+    dataFile.close();
+  }
+  else {
+    Serial.println("error opening datalog.txt");
+  }
 }
