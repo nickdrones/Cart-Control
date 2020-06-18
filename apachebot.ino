@@ -7,7 +7,7 @@
 int forwardPin = 4;  //forward side of dead-man rocker switch
 int backwardPin = 5; //backward side of dead-man rocker switch
 int PWM_out = 6; //PWM out to motor controller
-float val;   //temp variable for potentiometer value
+float val;  //temp variable for potentiometer value
 float mappedVal;  //temp calculated variable for potentiometer value
 
 float linear; //float with calculated linear value of log pot
@@ -60,10 +60,13 @@ void loop() {
 
   while (not digitalRead(forwardPin) && not digitalRead(backwardPin)) { //while move button is not on
     smoothDialVal();
-    if (!statusOfCart.equals("STOPPED")) {
-      changeStatus("STOPPED");
-      createLogFileLine("Cart Stopped");
-    }
+    Serial.println(calculatePulseOffset());
+    Serial.println("stop");
+
+    //if (!statusOfCart.equals("STOPPED")) {
+    //changeStatus("STOPPED");
+    //createLogFileLine("Cart Stopped");
+    //}
     digitalWrite(LED_BUILTIN, LOW);
     delay(20);
     if (motorPulse > middleSpace) {
@@ -80,14 +83,18 @@ void loop() {
 
   while (digitalRead(forwardPin)) //while forward is pressed on switch
   {
-    logCurrent();
+    //logCurrent();
+    Serial.println("forward");
+    Serial.println(calculatePulseOffset());
+
+    //Serial.println(getCurrentOnMotor());
     if (motorPulse < (middleSpace + calculatePulseOffset())) { //ramp cart speed up
       motorPulse += incrementSpeed;
     }
-    if (!statusOfCart.equals("FORWARD")) {
-      changeStatus("FORWARD");
-      createLogFileLine("Cart Moving Forward");
-    }
+    //if (!statusOfCart.equals("FORWARD")) {
+    // changeStatus("FORWARD");
+    //createLogFileLine("Cart Moving Forward");
+    //}
     sendMSpulse(motorPulse);    //send pulse to motor
     digitalWrite(LED_BUILTIN, HIGH);
     //Serial.println(motorPulse);
@@ -97,14 +104,17 @@ void loop() {
 
   while (digitalRead(backwardPin))  //while backward is pressed on switch
   {
-    logCurrent();
+    //logCurrent();
+    Serial.println("backward");
+    Serial.println(calculatePulseOffset());
+    //Serial.println(getCurrentOnMotor());
     if (motorPulse > (middleSpace - calculatePulseOffset())) {  //ramp cart speed up
       motorPulse -= incrementSpeed;
     }
-    if (!statusOfCart.equals("BACKWARD")) {
-      changeStatus("BACKWARD");
-      createLogFileLine("Cart Moving Backward");
-    }
+    //if (!statusOfCart.equals("BACKWARD")) {
+    //changeStatus("BACKWARD");
+    //createLogFileLine("Cart Moving Backward");
+    //}
     sendMSpulse(motorPulse);      //send pulse to motor
     digitalWrite(LED_BUILTIN, HIGH);
     //Serial.println(motorPulse);
