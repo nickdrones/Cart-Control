@@ -131,7 +131,7 @@ bool rockerBackward()
 
 float calculatePulseOffset() {
   //                 min  max 1mph 2mph
-  return map(average, 476, 1023, 0, 500); //map values from log pot to equivelant pulse difference from 1500 (ie: max speed is 240 on dial so 500 on mapped value so 1500+500=2000 which is max PWM pulse)
+  return map(average, 476, 1023, 500, 0); //map values from log pot to equivelant pulse difference from 1500 (ie: max speed is 240 on dial so 500 on mapped value so 1500+500=2000 which is max PWM pulse)
 }
 
 void smoothDialVal() {
@@ -145,7 +145,7 @@ void smoothDialVal() {
 }
 
 void writeToDisplay() {
-  int percentage = map(average, 476, 1023, 0, 100);
+  int percentage = map(average, 476, 1023, 100, 0);
   //data[0] = display.encodeDigit(0);
   //data[1] = display.encodeDigit(int(percent / 100));
   //data[2] = display.encodeDigit(int(percent / 10));
