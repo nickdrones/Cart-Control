@@ -133,8 +133,12 @@ bool rockerBackward()
 
 float calculatePulseOffset() {
   //                 min  max 1mph 2mph
-  float temp = map(average, 520, 1020, 500, 0);
-  return temp;
+
+  //float temp = map(average, 520, 1020, 500, 0);
+  float pulseAmount =0;
+  if(average>=654){pulseAmount = map(average, 654, 1010, 50, 0);}
+  else {pulseAmount = map(average, 520, 654, 100, 50);}
+  return pulseAmount*5;
 }
 
 void smoothDialVal() {
@@ -148,7 +152,11 @@ void smoothDialVal() {
 }
 
 void writeToDisplay() {
-  int percentage = map(average, 520, 1010, 100, 0);
+  //int percentage = map(average, 520, 1010, 100, 0);
+  //percentage = average * 0.01;
+  int percentage = 0;
+  if(average>=654){percentage = map(average, 654, 1010, 50, 0);}
+  else {percentage = map(average, 520, 654, 100, 50);}
   if (percentage < 0) {
     display.showNumberDec(0, false);
   }
@@ -214,8 +222,10 @@ void newBootUp() {
 }
 
 String getCurrentOnMotor() {
-  int sensorValue = analogRead(A0);
-  return String(average);
+  int percentageVal =0;
+  if(average>=654){percentageVal = map(average, 654, 1010, 50, 0);}
+  else {percentageVal = map(average, 520, 654, 100, 50);}
+  return String(percentageVal);
 }
 
 void logCurrent() {
