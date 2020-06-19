@@ -51,6 +51,7 @@ void setup() {
   Serial.println("card initialized.");
   newBootUp();
   createLogFileLine("Robot Booted and Card Initialized");
+
 }
 void loop() {
   uint8_t blank[] = { 0x00, 0x00, 0x00, 0x00 }; //hex vals for all segments off
@@ -58,8 +59,9 @@ void loop() {
 
   while (not digitalRead(forwardPin) && not digitalRead(backwardPin)) { //while move button is not on
     smoothDialVal();
-    Serial.println(calculatePulseOffset());
+    //Serial.println(calculatePulseOffset());
     Serial.println("stop");
+    Serial.println(getCurrentOnMotor());
 
     //if (!statusOfCart.equals("STOPPED")) {
     //changeStatus("STOPPED");
@@ -83,9 +85,9 @@ void loop() {
   {
     //logCurrent();
     Serial.println("forward");
-    Serial.println(calculatePulseOffset());
+    //Serial.println(calculatePulseOffset());
 
-    //Serial.println(getCurrentOnMotor());
+    Serial.println(getCurrentOnMotor());
     if (motorPulse < (middleSpace + calculatePulseOffset())) { //ramp cart speed up
       motorPulse += incrementSpeed;
     }
@@ -104,8 +106,8 @@ void loop() {
   {
     //logCurrent();
     Serial.println("backward");
-    Serial.println(calculatePulseOffset());
-    //Serial.println(getCurrentOnMotor());
+    //Serial.println(calculatePulseOffset());
+    Serial.println(getCurrentOnMotor());
     if (motorPulse > (middleSpace - calculatePulseOffset())) {  //ramp cart speed up
       motorPulse -= incrementSpeed;
     }
@@ -131,7 +133,8 @@ bool rockerBackward()
 
 float calculatePulseOffset() {
   //                 min  max 1mph 2mph
-  return map(average, 476, 1023, 500, 0); //map values from log pot to equivelant pulse difference from 1500 (ie: max speed is 240 on dial so 500 on mapped value so 1500+500=2000 which is max PWM pulse)
+  float temp = map(average, 520, 1020, 500, 0);
+  return temp;
 }
 
 void smoothDialVal() {
@@ -145,11 +148,7 @@ void smoothDialVal() {
 }
 
 void writeToDisplay() {
-  int percentage = map(average, 476, 1023, 100, 0);
-  //data[0] = display.encodeDigit(0);
-  //data[1] = display.encodeDigit(int(percent / 100));
-  //data[2] = display.encodeDigit(int(percent / 10));
-  //data[3] = display.encodeDigit(int(percent % 10));
+  int percentage = map(average, 520, 1010, 100, 0);
   if (percentage < 0) {
     display.showNumberDec(0, false);
   }
@@ -213,10 +212,12 @@ void newBootUp() {
     Serial.println("error opening datalog.txt");
   }
 }
+
 String getCurrentOnMotor() {
   int sensorValue = analogRead(A0);
-  return String(map(sensorValue, 0, 1023, 0, 200));
+  return String(average);
 }
+
 void logCurrent() {
   File dataFile = SD.open("datalog.txt", FILE_WRITE);
   // if the file is available, write to it:
