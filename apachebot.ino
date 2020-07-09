@@ -108,7 +108,7 @@ void loop() {
     Serial.println("backward");
     //Serial.println(calculatePulseOffset());
     Serial.println(getCurrentOnMotor());
-    if (motorPulse > (middleSpace - calculatePulseOffset())) {  //ramp cart speed up
+    if (motorPulse > 1335) {  //ramp cart speed up
       motorPulse -= incrementSpeed;
     }
     //if (!statusOfCart.equals("BACKWARD")) {
